@@ -4,6 +4,10 @@ using AvaloniaToaster.Themes;
 using System;
 using System.Threading.Tasks;
 
+// Author: Tavis MacFarlane
+// Copyright (c) 2025 Tavis MacFarlane
+// License: MIT
+
 namespace AvaloniaToaster;
 
 public class ToastNotificationService
