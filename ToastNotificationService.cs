@@ -1,4 +1,5 @@
 ﻿using Avalonia.Controls;
+using Avalonia.Threading;
 using AvaloniaToaster.Interfaces;
 using AvaloniaToaster.Themes;
 using System;
@@ -12,10 +13,10 @@ namespace AvaloniaToaster;
 
 public class ToastNotificationService
 {
-    private Window _mainWindow;
+    private Window? _mainWindow;
 
     private IAvaloniaToasterThemes _defaultTheme = new AvaloniaToasterDefaultTheme();
-    
+
     public void RegisterMainWindow(Window window) => _mainWindow = window;
 
     /// <summary>
@@ -30,9 +31,7 @@ public class ToastNotificationService
     (
         string message,
         int durationMs = 3000,
-#pragma warning disable CS8625 // Cannot convert null literal to non-nullable reference type.
         IAvaloniaToasterThemes theme = null
-#pragma warning restore CS8625 // Cannot convert null literal to non-nullable reference type.
     )
     {
         if (_mainWindow == null)
@@ -40,20 +39,23 @@ public class ToastNotificationService
 
         if (theme is null) theme = _defaultTheme;
 
-        // Create a simple overlay (could be a UserControl, Border, etc.)
         var toast = new Border
         {
             Background = theme.BackgroundColor,
-            CornerRadius = new Avalonia.CornerRadius(5),
+            CornerRadius = theme.BorderRadius is not null ? new Avalonia.CornerRadius((double)theme.BorderRadius!) : new Avalonia.CornerRadius(5),
             Padding = new Avalonia.Thickness(20),
+            Width = 150,
+            Opacity = 0,
             Child = new TextBlock
             {
                 Text = message,
                 Foreground = theme.ForegroundColor,
-                FontSize = 16
+                FontSize = 14,
+                TextAlignment = Avalonia.Media.TextAlignment.Center,
+                VerticalAlignment = Avalonia.Layout.VerticalAlignment.Center
             },
-            HorizontalAlignment = Avalonia.Layout.HorizontalAlignment.Right,
-            VerticalAlignment = Avalonia.Layout.VerticalAlignment.Bottom,
+            HorizontalAlignment = theme.HorizontalAlignment ?? Avalonia.Layout.HorizontalAlignment.Right,
+            VerticalAlignment = theme.VerticalAlignment ?? Avalonia.Layout.VerticalAlignment.Bottom,
             Margin = new Avalonia.Thickness(0, 40, 0, 0),
             ZIndex = 9999
         };
@@ -62,10 +64,26 @@ public class ToastNotificationService
         {
             panel.Children.Add(toast);
 
-            // Remove after duration
-            Task.Delay(durationMs).ContinueWith(_ =>
+            Dispatcher.UIThread.Post(async () =>
             {
-                Avalonia.Threading.Dispatcher.UIThread.Post(() => panel.Children.Remove(toast));
+                for (double i = 0; i <= 1; i += 0.1)
+                {
+                    toast.Opacity = i;
+                    await Task.Delay(20);
+                }
+            });
+
+            Task.Run(async () =>
+            {
+                await Task.Delay(durationMs);
+
+                for (double i = 1; i >= 0; i -= 0.1)
+                {
+                    Dispatcher.UIThread.Post(() => toast.Opacity = i);
+                    await Task.Delay(20);
+                }
+
+                Dispatcher.UIThread.Post(() => panel.Children.Remove(toast));
             });
         }
     }
