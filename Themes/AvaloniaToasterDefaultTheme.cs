@@ -5,7 +5,7 @@ namespace AvaloniaToaster.Themes;
 
 internal class AvaloniaToasterDefaultTheme : IAvaloniaToasterThemes
 {
-    public IBrush BackgroundColor => Brushes.Blue;
+    public IBrush BackgroundColor => Brushes.Black;
 
     public IBrush ForegroundColor => Brushes.White;
 }
