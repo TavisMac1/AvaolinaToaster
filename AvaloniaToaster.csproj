@@ -2,7 +2,7 @@
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
     <PackageId>AvaloniaToaster</PackageId>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <Authors>TavisMac1</Authors>
     <Description>A toast notification service for Avalonia UI.</Description>
     <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
