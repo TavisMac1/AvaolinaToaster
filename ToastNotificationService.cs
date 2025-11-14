@@ -1,6 +1,7 @@
 ﻿using Avalonia.Controls;
 using Avalonia.Threading;
 using AvaloniaToaster.Interfaces;
+using AvaloniaToaster.Services.Extensions;
 using AvaloniaToaster.Themes;
 using System;
 using System.Threading.Tasks;
@@ -56,13 +57,25 @@ public class ToastNotificationService
             },
             HorizontalAlignment = theme.HorizontalAlignment ?? Avalonia.Layout.HorizontalAlignment.Right,
             VerticalAlignment = theme.VerticalAlignment ?? Avalonia.Layout.VerticalAlignment.Bottom,
-            Margin = new Avalonia.Thickness(0, 40, 0, 0),
+            Margin = new Avalonia.Thickness(0, 0, 40, 40), // 40px from right and bottom
             ZIndex = 9999
         };
 
-        if (_mainWindow.Content is Panel panel)
+        var rootGrid = _mainWindow.FindRootGrid();
+        if (rootGrid != null)
         {
-            panel.Children.Add(toast);
+            if (rootGrid.RowDefinitions.Count == 0)
+                rootGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Star });
+
+            if (rootGrid.ColumnDefinitions.Count == 0)
+                rootGrid.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Star });
+
+            Grid.SetColumn(toast, 0);
+            Grid.SetRow(toast, 0);
+            Grid.SetColumnSpan(toast, rootGrid.ColumnDefinitions.Count);
+            Grid.SetRowSpan(toast, rootGrid.RowDefinitions.Count);
+
+            rootGrid.Children.Add(toast);
 
             Dispatcher.UIThread.Post(async () =>
             {
@@ -83,7 +96,7 @@ public class ToastNotificationService
                     await Task.Delay(20);
                 }
 
-                Dispatcher.UIThread.Post(() => panel.Children.Remove(toast));
+                Dispatcher.UIThread.Post(() => rootGrid.Children.Remove(toast));
             });
         }
     }
