@@ -14,7 +14,9 @@ namespace AvaloniaToaster;
 
 public class ToastNotificationService
 {
+#pragma warning disable CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
     private Window? _mainWindow;
+#pragma warning restore CS8632 // The annotation for nullable reference types should only be used in code within a '#nullable' annotations context.
 
     private IAvaloniaToasterThemes _defaultTheme = new AvaloniaToasterDefaultTheme();
 
